@@ -23,14 +23,15 @@ metadata:
             "kbsConfigMapName": "kbs-config",
             "kbsDeploymentType": "AllInOneDeployment",
             "kbsResourcePolicyConfigMapName": "resource-policy",
-            "kbsRvpsRefValuesConfigMapName": "rvps-reference-values"
+            "kbsRvpsRefValuesConfigMapName": "rvps-reference-values",
+            "kbsTdxConfigMapName": "tdx-config"
           }
         }
       ]
     capabilities: Basic Install
     categories: Security
     containerImage: quay.io/confidential-containers/trustee-operator:v0.1.0
-    createdAt: "2024-06-26T09:55:58Z"
+    createdAt: "2024-06-26T10:00:49Z"
     operators.operatorframework.io/builder: operator-sdk-v1.33.0
     operators.operatorframework.io/project_layout: go.kubebuilder.io/v4
     support: Confidential Containers Community

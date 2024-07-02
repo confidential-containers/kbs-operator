@@ -40,8 +40,9 @@ spec:
             description: KbsConfigSpec defines the desired state of KbsConfig
             properties:
               kbsAsConfigMapName:
-                description: KbsAsConfigMapName is the name of the configmap that
-                  contains the KBS AS configuration
+                description: |-
+                  KbsAsConfigMapName is the name of the configmap that contains the KBS AS configuration
+                  Required only when MicroservicesDeployment is set
                 type: string
               kbsAuthSecretName:
                 description: KbsAuthSecretName is the name of the secret that contains
@@ -57,6 +58,10 @@ spec:
                   It can assume one of the following values:
                      AllInOneDeployment: all the KBS components will be deployed in the same container
                      MicroservicesDeployment: all the KBS components will be deployed in separate containers
+                  Default value is AllInOneDeployment
+                enum:
+                - AllInOneDeployment
+                - MicroservicesDeployment
                 type: string
               kbsHttpsCertSecretName:
                 description: KbsHttpsCertSecretName is the name of the secret that
@@ -71,8 +76,9 @@ spec:
                   that contains the Resource Policy
                 type: string
               kbsRvpsConfigMapName:
-                description: KbsRvpsConfigMapName is the name of the configmap that
-                  contains the KBS RVPS configuration
+                description: |-
+                  KbsRvpsConfigMapName is the name of the configmap that contains the KBS RVPS configuration
+                  Required only when MicroservicesDeployment is set
                 type: string
               kbsRvpsRefValuesConfigMapName:
                 description: kbsRvpsRefValuesConfigMapName is the name of the configmap
@@ -85,8 +91,19 @@ spec:
                   type: string
                 type: array
               kbsServiceType:
-                description: KbsServiceType is the type of service to create for KBS
+                description: |-
+                  KbsServiceType is the type of service to create for KBS
+                  Default value is ClusterIP
                 type: string
+              tdxConfigSpec:
+                description: tdxConfigSpec is the struct that hosts the TDX specific
+                  configuration
+                properties:
+                  kbsTdxConfigMapName:
+                    description: kbsTdxConfigMapName is the name of the configmap
+                      containing sgx_default_qcnl.conf file
+                    type: string
+                type: object
             type: object
           status:
             description: KbsConfigStatus defines the observed state of KbsConfig

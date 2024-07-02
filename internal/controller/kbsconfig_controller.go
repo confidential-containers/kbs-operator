@@ -333,7 +333,7 @@ func (r *KbsConfigReconciler) newKbsDeployment(ctx context.Context) (*appsv1.Dep
 	// are mounted as a RW volume in memory to allow trustee components
 	// to have full access to the filesystem
 	// confidential-containers
-	volume, err := r.createConfidentialContainersVolume(confidentialContainers)
+	volume, err := r.createEmptyDirVolume(confidentialContainers)
 	if err != nil {
 		return nil, err
 	}
@@ -341,7 +341,7 @@ func (r *KbsConfigReconciler) newKbsDeployment(ctx context.Context) (*appsv1.Dep
 	volumeMount := createVolumeMount(volume.Name, filepath.Join(rootPath, volume.Name))
 	kbsVM = append(kbsVM, volumeMount)
 	// default repo
-	volume, err = r.createDefaultRepositoryVolume(defaultRepository)
+	volume, err = r.createEmptyDirVolume(defaultRepository)
 	if err != nil {
 		return nil, err
 	}
@@ -359,13 +359,26 @@ func (r *KbsConfigReconciler) newKbsDeployment(ctx context.Context) (*appsv1.Dep
 	kbsVM = append(kbsVM, volumeMount)
 
 	// resource policy
-	volume, err = r.createConfigMapVolume(ctx, "opa", r.kbsConfig.Spec.KbsResourcePolicyConfigMapName)
-	if err != nil {
-		return nil, err
+	if r.kbsConfig.Spec.KbsResourcePolicyConfigMapName != "" {
+		volume, err = r.createConfigMapVolume(ctx, "opa", r.kbsConfig.Spec.KbsResourcePolicyConfigMapName)
+		if err != nil {
+			return nil, err
+		}
+		volumeMount = createVolumeMount(volume.Name, filepath.Join(confidentialContainersPath, volume.Name))
+		volumes = append(volumes, *volume)
+		kbsVM = append(kbsVM, volumeMount)
 	}
-	volumeMount = createVolumeMount(volume.Name, filepath.Join(confidentialContainersPath, volume.Name))
-	volumes = append(volumes, *volume)
-	kbsVM = append(kbsVM, volumeMount)
+
+	// TDX specific configuration
+	if r.kbsConfig.Spec.TdxConfigSpec.KbsTdxConfigMapName != "" {
+		volume, err = r.createConfigMapVolume(ctx, "tdx-config", r.kbsConfig.Spec.TdxConfigSpec.KbsTdxConfigMapName)
+		if err != nil {
+			return nil, err
+		}
+		volumeMount = createVolumeMountWithSubpath(volume.Name, filepath.Join(kbsDefaultConfigPath, tdxConfigFile), tdxConfigFile)
+		volumes = append(volumes, *volume)
+		kbsVM = append(kbsVM, volumeMount)
+	}
 
 	// auth-secret
 	volume, err = r.createSecretVolume(ctx, "auth-secret", r.kbsConfig.Spec.KbsAuthSecretName)
@@ -690,7 +703,8 @@ func configMapToKbsConfigMapper(c client.Client, log logr.Logger) (handler.MapFu
 				kbsConfig.Spec.KbsAsConfigMapName == configMap.Name ||
 				kbsConfig.Spec.KbsRvpsConfigMapName == configMap.Name ||
 				kbsConfig.Spec.KbsRvpsRefValuesConfigMapName == configMap.Name ||
-				kbsConfig.Spec.KbsResourcePolicyConfigMapName == configMap.Name {
+				kbsConfig.Spec.KbsResourcePolicyConfigMapName == configMap.Name ||
+				kbsConfig.Spec.TdxConfigSpec.KbsTdxConfigMapName == configMap.Name {
 
 				requests = append(requests, reconcile.Request{
 					NamespacedName: types.NamespacedName{

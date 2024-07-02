@@ -64,6 +64,9 @@ const (
 
 	// Default RVPS reference values Path
 	rvpsReferenceValuesPath = confidentialContainersPath + "/rvps"
+
+	// TDX config file
+	tdxConfigFile = "sgx_default_qcnl.conf"
 )
 
 func contains(list []string, s string) bool {

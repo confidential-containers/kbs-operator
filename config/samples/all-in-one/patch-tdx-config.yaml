@@ -1,0 +1,7 @@
+apiVersion: confidentialcontainers.org/v1alpha1
+kind: KbsConfig
+metadata:
+  name: kbsconfig-sample
+  namespace: kbs-operator-system
+spec:
+  kbsTdxConfigMapName: tdx-config

@@ -9,15 +9,19 @@ The operator manages a Kubernetes custom resource named: `KbsConfig`. Following 
 `KbsConfig` custom resource definition
 
 ```golang
+// KbsConfigSpec defines the desired state of KbsConfig
 type KbsConfigSpec struct {
-
   // KbsConfigMapName is the name of the configmap that contains the KBS configuration
   KbsConfigMapName string `json:"kbsConfigMapName,omitempty"`
 
   // KbsAsConfigMapName is the name of the configmap that contains the KBS AS configuration
+  // Required only when MicroservicesDeployment is set
+  // +optional
   KbsAsConfigMapName string `json:"kbsAsConfigMapName,omitempty"`
 
   // KbsRvpsConfigMapName is the name of the configmap that contains the KBS RVPS configuration
+  // Required only when MicroservicesDeployment is set
+  // +optional
   KbsRvpsConfigMapName string `json:"kbsRvpsConfigMapName,omitempty"`
 
   // kbsRvpsRefValuesConfigMapName is the name of the configmap that contains the RVPS reference values
@@ -27,30 +31,44 @@ type KbsConfigSpec struct {
   KbsAuthSecretName string `json:"kbsAuthSecretName,omitempty"`
 
   // KbsServiceType is the type of service to create for KBS
+  // Default value is ClusterIP
+  // +optional
   KbsServiceType corev1.ServiceType `json:"kbsServiceType,omitempty"`
 
   // KbsDeploymentType is the type of KBS deployment
   // It can assume one of the following values:
   //    AllInOneDeployment: all the KBS components will be deployed in the same container
-  //    MicroservicesDeployment: all the KBS components will be deployed in separate containers (part of the same Kubernetes pod)
+  //    MicroservicesDeployment: all the KBS components will be deployed in separate containers
+  // +kubebuilder:validation:Enum=AllInOneDeployment;MicroservicesDeployment
+  // Default value is AllInOneDeployment
+  // +optional
   KbsDeploymentType DeploymentType `json:"kbsDeploymentType,omitempty"`
- 
+
   // KbsHttpsKeySecretName is the name of the secret that contains the KBS https private key
   KbsHttpsKeySecretName string `json:"kbsHttpsKeySecretName,omitempty"`
 
   // KbsHttpsCertSecretName is the name of the secret that contains the KBS https certificate
   KbsHttpsCertSecretName string `json:"kbsHttpsCertSecretName,omitempty"`
 
-  // KbsHttpsKeySecretName is the name of the secret that contains the KBS https private key
-  KbsHttpsKeySecretName string `json:"kbsHttpsKeySecretName,omitempty"`
-
   // KbsSecretResources is an array of secret names that contain the keys required by clients
+  // +optional
   KbsSecretResources []string `json:"kbsSecretResources,omitempty"`
 
-// kbsResourcePolicyConfigMapName is the name of the configmap that contains the Resource Policy
-	KbsResourcePolicyConfigMapName string `json:"kbsResourcePolicyConfigMapName,omitempty"`
+  // kbsResourcePolicyConfigMapName is the name of the configmap that contains the Resource Policy
+  // +optional
+  KbsResourcePolicyConfigMapName string `json:"kbsResourcePolicyConfigMapName,omitempty"`
+
+  // tdxConfigSpec is the struct that hosts the TDX specific configuration
+  // +optional
+  TdxConfigSpec TdxConfigSpec `json:"tdxConfigSpec,omitempty"`
 }
-```
+
+// TdxConfigSpec defines the desired state for TDX configuration
+type TdxConfigSpec struct {
+  // kbsTdxConfigMapName is the name of the configmap containing sgx_default_qcnl.conf file
+  // +optional
+  KbsTdxConfigMapName string `json:"kbsTdxConfigMapName,omitempty"`
+}```
 
 Note: the default deployment type is ```MicroservicesDeployment```.
 The examples below apply to this mode.
@@ -138,6 +156,8 @@ spec:
   kbsSecretResources: ["kbsres1"]
   # Resource policy
   kbsResourcePolicyConfigMapName: resource-policy
+  # TDX configuration file
+  kbsTdxConfigMapName: tdx-config
 ```
 
 ## Getting Started

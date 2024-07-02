@@ -21,6 +21,7 @@ generatorOptions:
 patches:
 - path: patch-ref-values.yaml
 - path: patch-resource-policy.yaml
+- path: patch-tdx-config.yaml
 # uncomment the following line for injecting sample resources in kbs
 #- path: patch-kbs-resources.yaml
 
@@ -31,4 +32,5 @@ resources:
 - rvps-config.yaml
 - rvps-reference-values.yaml
 - resource-policy.yaml
+- tdx-config.yaml
 #+kubebuilder:scaffold:manifestskustomizesamples
